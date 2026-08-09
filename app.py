@@ -58,7 +58,7 @@ if option=="Basic Information":
 
 elif option == "Operational Tasks":
     st.header("Operational Tasks")
-    selected_task= st.selectbox("Choose an Task",["Add New Product","Product History","Place Reorder","Receive Reorder"])
+    selected_task= st.selectbox("Choose a Task",["Add New Product","Product History","Place Reorder","Receive Reorder"])
     if selected_task =="Add New Product":
         st.header("Add New Product")
         categories=get_categories(cursor)
