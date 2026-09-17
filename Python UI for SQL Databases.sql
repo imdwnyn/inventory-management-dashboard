@@ -1,6 +1,6 @@
 select * from products 
 select * from reorders
-select * from Shipments
+select * from shipments
 select * from stock_entries
 select * from suppliers
 
@@ -42,7 +42,7 @@ se.entry_date>=
  )
  
  
- -- 6 
+ -- 6 Below Reorder and No Pending Reorders
  select count(*) from products  as p  where p.stock_quantity<p.reorder_level
  and  product_id NOT IN 
  (
@@ -51,7 +51,7 @@ select distinct product_id from reorders  where status ="Pending"
 
 
 
--- 7 Suppliers adn their  contact details
+-- 7 Suppliers and their contact details
 select supplier_name, contact_name , email, phone from suppliers
 
 
@@ -67,7 +67,7 @@ order by p.product_name ASC
 select product_id ,product_name, stock_quantity, reorder_level  from products where stock_quantity<reorder_level
 
 
--- 10  Add an new product to the database
+-- 10  Add a new product to the database
 delimiter $$
 create procedure AddNewProductManualID(
    in p_name varchar(255),
@@ -82,14 +82,14 @@ Begin
   declare  new_shipment_id int;
   declare new_entry_id int;
   
-  #make chnages in product table
+  #make changes in product table
   #generate the product id
   select max(product_id)+1  into  new_prod_id from products;
   insert into products( product_id,product_name , category, price , stock_quantity, reorder_level, supplier_id)
   values(new_prod_id,p_name,p_category,p_price,p_stock,p_reorder,p_supplier);
   
   
-  #make changes in shipment table
+  # make changes in shipment table
   # generate the shipment id
   select max(shipment_id)+1 into new_shipment_id from shipments;
   insert into shipments (shipment_id , product_id , supplier_id , quantity_received, shipment_date)
@@ -109,11 +109,11 @@ call AddNewProductManualID('Smart Watch', 'Electronics', 99.99,100,25,5)
 
 
 
-select * from products where  product_name ="Bettles"
-select * from shipments where product_id =202
-select * from stock_entries where product_id= 202
+select * from products where  product_name ="Smart Watch"
+select * from shipments where product_id =201
+select * from stock_entries where product_id= 201
 
--- 11 Product History , [ finding shipment , sales , purchase]
+-- 11 Product History , [finding shipment , sales , purchase]
 create or replace view product_inventory_history as 
 select 
 pih.product_id ,
@@ -151,9 +151,9 @@ where product_id= 123
 order by record_date desc
 
 
--- 12 Place an reorder
+-- 12 Place a reorder
 insert into reorders(reorder_id , product_id , reorder_quantity, reorder_date ,status)
-select max(reorder_id)+1,  101, 200, curdate(), "ordered" from reorders
+select max(reorder_id)+1,  101, 200, curdate(), "Ordered" from reorders
 
 
 select * from stock_entries
@@ -202,7 +202,7 @@ select max(shipment_id)+1  into new_shipment_id from shipments ;
 insert  into shipments(shipment_id , product_id , supplier_id , quantity_received , shipment_date)
 values (new_shipment_id, prod_id , sup_id , qty, curdate());
 
-# Insert record into  Restock 
+# Insert record into stock entries table 
 select max(entry_id)+1  into new_entry_id from stock_entries;
 insert  into stock_entries(entry_id , product_id , change_quantity , change_type , entry_date)
 values(new_entry_id,prod_id, qty , "Restock", curdate());
@@ -210,7 +210,7 @@ values(new_entry_id,prod_id, qty , "Restock", curdate());
 commit;
 End$$ 
 
-Delimiter;
+DELIMITER ;
 
 set sql_safe_updates=0
 
@@ -229,5 +229,3 @@ select * from reorders where reorder_id= 1
 
 select * from stock_entries where product_id=164 order by entry_date desc
 select * from shipments  order  by shipment_id desc
-
-
